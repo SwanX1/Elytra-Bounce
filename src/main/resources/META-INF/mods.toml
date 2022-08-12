@@ -1,0 +1,28 @@
+modLoader="javafml"
+loaderVersion="[36,)"
+license="Apache-2.0"
+[[mods]]
+modId="elytrabounce"
+version="${file.jarVersion}"
+displayName="Elytra Bounce"
+updateJSONURL="https://infernalstudios.org/api/mods/elytrabounce/forge"
+logoFile="Elytra_Bounce_Banner.png"
+authors="Infernal Studios"
+description='''
+Elytra Bounce lets you bounce instead of landing with an elytra!
+
+Credits
+LudoCrypt - Developer
+'''
+[[dependencies.elytrabounce]]
+    modId="forge"
+    mandatory=true
+    versionRange="[36,)"
+    ordering="NONE"
+    side="CLIENT"
+[[dependencies.elytrabounce]]
+    modId="minecraft"
+    mandatory=true
+    versionRange="[1.18,)"
+    ordering="NONE"
+    side="CLIENT"
