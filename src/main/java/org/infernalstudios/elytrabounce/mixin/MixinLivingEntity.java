@@ -18,7 +18,11 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.At.Shift;
+import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -29,7 +33,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 
-@Mixin(LivingEntity.class)
+@Mixin(value = LivingEntity.class, priority = 1200)
 public abstract class MixinLivingEntity extends Entity {
 
 	@Unique
@@ -43,7 +47,7 @@ public abstract class MixinLivingEntity extends Entity {
 	}
 
 	@ModifyArg(method = "Lnet/minecraft/world/entity/LivingEntity;travel(Lnet/minecraft/world/phys/Vec3;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;setSharedFlag(IZ)V"), index = 1)
-	private boolean elytraBounce$travel$flag(boolean in) {
+	private boolean elytraBounce$travel(boolean in) {
 		ItemStack itemstack = this.getItemBySlot(EquipmentSlot.CHEST);
 		if (itemstack.is(Items.ELYTRA) && ElytraItem.isFlyEnabled(itemstack)) {
 			if (ticksOnGround <= 1) {
@@ -54,21 +58,21 @@ public abstract class MixinLivingEntity extends Entity {
 		return in;
 	}
 
-	@ModifyArg(method = "Lnet/minecraft/world/entity/LivingEntity;updateFallFlying()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;setSharedFlag(IZ)V"), index = 1)
-	private boolean elytraBounce$updateFallFlying$flag(boolean in) {
-		if (wasGoodBefore && !in && this.isOnGround()) {
+	@Inject(method = "Lnet/minecraft/world/entity/LivingEntity;updateFallFlying()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;setSharedFlag(IZ)V", shift = Shift.AFTER), locals = LocalCapture.CAPTURE_FAILHARD)
+	private void elytraBounce$updateFallFlying(CallbackInfo ci, boolean flag) {
+		if (wasGoodBefore && !flag && this.isOnGround()) {
 			ItemStack itemstack = this.getItemBySlot(EquipmentSlot.CHEST);
 			if (itemstack.is(Items.ELYTRA) && ElytraItem.isFlyEnabled(itemstack)) {
-				wasGoodBefore = in;
+				wasGoodBefore = flag;
 				ticksOnGround++;
-				return true;
+				this.setSharedFlag(7, true);
+				return;
 			}
 		} else {
 			ticksOnGround = 0;
 		}
 
-		wasGoodBefore = in;
-		return in;
+		wasGoodBefore = flag;
 	}
 
 	@Shadow

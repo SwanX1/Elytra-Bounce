@@ -9,10 +9,12 @@ updateJSONURL="https://infernalstudios.org/api/mods/elytrabounce/forge"
 logoFile="Elytra_Bounce_Banner.png"
 authors="Infernal Studios"
 description='''
-Elytra Bounce lets you bounce instead of landing with an elytra!
+Elytra Bounce lets you bounce against the ground with an elytra to build up and maintain momentum without firework rockets! 
+Simply hold down the jump button while in flight, and you'll bounce!
 
 Credits
 LudoCrypt - Developer
+Nekomaster1000 - Artist
 '''
 [[dependencies.elytrabounce]]
     modId="forge"
