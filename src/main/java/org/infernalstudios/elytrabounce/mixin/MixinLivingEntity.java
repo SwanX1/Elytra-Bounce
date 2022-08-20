@@ -50,7 +50,7 @@ public abstract class MixinLivingEntity extends Entity {
 	private boolean elytraBounce$travel(boolean in) {
 		ItemStack itemstack = this.getItemBySlot(EquipmentSlot.CHEST);
 		if (itemstack.is(Items.ELYTRA) && ElytraItem.isFlyEnabled(itemstack)) {
-			if (ticksOnGround <= 1) {
+			if (ticksOnGround <= 5) {
 				return true;
 			}
 		}
@@ -63,15 +63,14 @@ public abstract class MixinLivingEntity extends Entity {
 		if (wasGoodBefore && !flag && this.isOnGround()) {
 			ItemStack itemstack = this.getItemBySlot(EquipmentSlot.CHEST);
 			if (itemstack.is(Items.ELYTRA) && ElytraItem.isFlyEnabled(itemstack)) {
-				wasGoodBefore = flag;
 				ticksOnGround++;
+				wasGoodBefore = true;
 				this.setSharedFlag(7, true);
 				return;
 			}
-		} else {
-			ticksOnGround = 0;
 		}
 
+		ticksOnGround = 0;
 		wasGoodBefore = flag;
 	}
 
