@@ -28,9 +28,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.item.ElytraItem;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 
 @Mixin(value = LivingEntity.class, priority = 1200)
@@ -48,11 +46,8 @@ public abstract class MixinLivingEntity extends Entity {
 
 	@ModifyArg(method = "Lnet/minecraft/world/entity/LivingEntity;travel(Lnet/minecraft/world/phys/Vec3;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;setSharedFlag(IZ)V"), index = 1)
 	private boolean elytraBounce$travel(boolean in) {
-		ItemStack itemstack = this.getItemBySlot(EquipmentSlot.CHEST);
-		if (itemstack.is(Items.ELYTRA) && ElytraItem.isFlyEnabled(itemstack)) {
-			if (ticksOnGround <= 5) {
-				return true;
-			}
+		if (ticksOnGround <= 5) {
+			return true;
 		}
 
 		return in;
@@ -61,13 +56,10 @@ public abstract class MixinLivingEntity extends Entity {
 	@Inject(method = "Lnet/minecraft/world/entity/LivingEntity;updateFallFlying()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;setSharedFlag(IZ)V", shift = Shift.AFTER), locals = LocalCapture.CAPTURE_FAILHARD)
 	private void elytraBounce$updateFallFlying(CallbackInfo ci, boolean flag) {
 		if (wasGoodBefore && !flag && this.isOnGround()) {
-			ItemStack itemstack = this.getItemBySlot(EquipmentSlot.CHEST);
-			if (itemstack.is(Items.ELYTRA) && ElytraItem.isFlyEnabled(itemstack)) {
-				ticksOnGround++;
-				wasGoodBefore = true;
-				this.setSharedFlag(7, true);
-				return;
-			}
+			ticksOnGround++;
+			wasGoodBefore = true;
+			this.setSharedFlag(7, true);
+			return;
 		}
 
 		ticksOnGround = 0;
