@@ -3,9 +3,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -15,7 +15,6 @@
 package org.infernalstudios.elytrabounce.mixin;
 
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.At.Shift;
@@ -24,15 +23,13 @@ import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.Level;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityType;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.world.World;
 
 @Mixin(value = LivingEntity.class, priority = 1200)
-public abstract class MixinLivingEntity extends Entity {
+public abstract class LivingEntityMixin extends Entity {
 
 	@Unique
 	private int ticksOnGround = 0;
@@ -40,11 +37,11 @@ public abstract class MixinLivingEntity extends Entity {
 	@Unique
 	private boolean wasGoodBefore = false;
 
-	public MixinLivingEntity(EntityType<?> entityType, Level world) {
+	public LivingEntityMixin(EntityType<?> entityType, World world) {
 		super(entityType, world);
 	}
 
-	@ModifyArg(method = "Lnet/minecraft/world/entity/LivingEntity;travel(Lnet/minecraft/world/phys/Vec3;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;setSharedFlag(IZ)V"), index = 1)
+	@ModifyArg(method = "Lnet/minecraft/entity/LivingEntity;travel(Lnet/minecraft/util/math/Vec3d;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;setFlag(IZ)V"), index = 1)
 	private boolean elytraBounce$travel(boolean in) {
 		if (ticksOnGround <= 5) {
 			return true;
@@ -53,20 +50,17 @@ public abstract class MixinLivingEntity extends Entity {
 		return in;
 	}
 
-	@Inject(method = "Lnet/minecraft/world/entity/LivingEntity;updateFallFlying()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;setSharedFlag(IZ)V", shift = Shift.AFTER), locals = LocalCapture.CAPTURE_FAILHARD)
+	@Inject(method = "Lnet/minecraft/entity/LivingEntity;tickFallFlying()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;setFlag(IZ)V", shift = Shift.AFTER), locals = LocalCapture.CAPTURE_FAILHARD)
 	private void elytraBounce$updateFallFlying(CallbackInfo ci, boolean flag) {
 		if (wasGoodBefore && !flag && this.isOnGround()) {
 			ticksOnGround++;
 			wasGoodBefore = true;
-			this.setSharedFlag(7, true);
+			this.setFlag(7, true);
 			return;
 		}
 
 		ticksOnGround = 0;
 		wasGoodBefore = flag;
 	}
-
-	@Shadow
-	public abstract ItemStack getItemBySlot(EquipmentSlot slot);
 
 }

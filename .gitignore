@@ -1,17 +1,30 @@
-bin
+# Gradle
+.gradle/
+build/
+out/
+classes/
+
+# Quilt Loom
+run/
+
+# Eclipse
 *.launch
-.settings
-.metadata
-.classpath
-.project
-out
+
+# IntelliJ Idea
+.idea/
+*.iml
 *.ipr
 *.iws
-*.iml
-.idea
-build
-.gradle
-eclipse
-run
-logs
 
+# Visual Studio Code
+.settings/
+.vscode/
+bin/
+.classpath
+.project
+
+# Eclipse JDT LS
+workspace/
+
+# macOS
+*.DS_Store
