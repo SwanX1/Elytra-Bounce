@@ -28,30 +28,26 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.world.World;
 
-@Mixin(value = LivingEntity.class, priority = 1200)
+@Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin extends Entity {
 
-	@Unique
-	private int ticksOnGround = 0;
-
-	@Unique
-	private boolean wasGoodBefore = false;
-
-	public LivingEntityMixin(EntityType<?> entityType, World world) {
-		super(entityType, world);
+	public LivingEntityMixin(EntityType<?> entity, World world) {
+		super(entity, world);
 	}
 
-	@ModifyArg(method = "Lnet/minecraft/entity/LivingEntity;travel(Lnet/minecraft/util/math/Vec3d;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;setFlag(IZ)V"), index = 1)
-	private boolean elytraBounce$travel(boolean in) {
-		if (ticksOnGround <= 5) {
-			return true;
-		}
+	@Unique private int ticksOnGround = 0;
+	@Unique private boolean wasGoodBefore = false;
 
-		return in;
+	@Unique private static final int MAX_GROUNDED_TIME = 5;
+
+	@ModifyArg(method = "travel", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;setFlag(IZ)V"), index = 1)
+	private boolean updateTravel(boolean isOnGround) {
+		if (ticksOnGround <= MAX_GROUNDED_TIME) return true;
+		return isOnGround;
 	}
 
-	@Inject(method = "Lnet/minecraft/entity/LivingEntity;tickFallFlying()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;setFlag(IZ)V", shift = Shift.AFTER), locals = LocalCapture.CAPTURE_FAILHARD)
-	private void elytraBounce$updateFallFlying(CallbackInfo ci, boolean flag) {
+	@Inject(method = "tickFallFlying", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;setFlag(IZ)V", shift = Shift.AFTER), locals = LocalCapture.CAPTURE_FAILHARD)
+	private void updateFallFlying(CallbackInfo ci, boolean flag) {
 		if (wasGoodBefore && !flag && this.isOnGround()) {
 			ticksOnGround++;
 			wasGoodBefore = true;
